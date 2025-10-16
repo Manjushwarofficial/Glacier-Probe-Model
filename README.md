@@ -6,14 +6,9 @@ An AI-powered system for analyzing and mapping long-term glacier retreat pattern
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
-## Usage Example
-
-![animation](https://github.com/user-attachments/assets/ae12656b-409e-4766-b549-9c2714a4bbb7)
-
-
 ## Overview
 
-Glacier Probe Model processes multi-temporal satellite imagery from Landsat and Sentinel missions to quantify glacier retreat. The system uses spectral analysis (NDSI-based detection) combined with Random Forest classification for baseline detection, then refines boundaries using U-Net deep learning architecture for complex scenarios including debris-covered glaciers and shadowed regions.
+A computer vision project analyzing glacier disintegration over time to support climate awareness and action. Glacier Probe Model applies image segmentation, edge detection, and temporal pattern recognition to multi-decadal satellite imagery, tracking glacier boundary changes and quantifying ice loss rates. The system combines traditional computer vision techniques with machine learning for baseline detection, then employs deep learning-based semantic segmentation to handle complex scenarios including debris-covered glaciers and shadowed regions.
 
 ## Key Capabilities
 
@@ -47,16 +42,16 @@ Glacier Probe Model processes multi-temporal satellite imagery from Landsat and 
 ### Geospatial Processing
 - Rasterio 1.3+ (GeoTIFF handling)
 - GDAL 3.6+
-- [Google Earth Engine Python API](https://developers.google.com/earth-engine/guides/python_install)
-- [Sentinelsat](https://sentinelsat.readthedocs.io/) (Sentinel-2 data access)
+- Google Earth Engine Python API
+- Sentinelsat (Sentinel-2 data access)
 - GeoPandas 0.13+ (vector operations)
-- Earthpy 0.9+ (remote sensing workflows)
+- Earthpy 0.9+
 
 ### Machine Learning
-- Scikit-image 0.21+ (GLCM texture features)
-- XGBoost 2.0+ (gradient boosting alternative)
-- [Segmentation Models PyTorch](https://github.com/qubvel/segmentation_models.pytorch)
-- [timm](https://github.com/huggingface/pytorch-image-models) (pre-trained encoders)
+- Scikit-image 0.21+ (edge detection, texture features)
+- XGBoost 2.0+
+- Segmentation Models PyTorch
+- timm (pre-trained encoders)
 
 ### Visualization
 - Matplotlib 3.7+, Plotly 5.17+
@@ -80,7 +75,7 @@ brew install gdal
 ```
 
 **Windows:**
-Use [OSGeo4W](https://trac.osgeo.org/osgeo4w/) or install via conda:
+Use OSGeo4W or install via conda:
 ```bash
 conda install -c conda-forge gdal
 ```
@@ -118,51 +113,40 @@ Follow the authentication flow in your browser and paste the token when prompted
 **Landsat Collection 2 (USGS)**
 - Resolution: 30m (multispectral), 15m (panchromatic)
 - Temporal coverage: 1984-present (Landsat 5/7/8/9)
-- Access: [Google Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets/catalog/landsat) or [EarthExplorer](https://earthexplorer.usgs.gov/)
-- Dataset IDs:
-  - `LANDSAT/LC08/C02/T1_L2` (Landsat 8)
-  - `LANDSAT/LC09/C02/T1_L2` (Landsat 9)
+- Access: [Google Earth Engine](https://developers.google.com/earth-engine/datasets/catalog/landsat) | [EarthExplorer](https://earthexplorer.usgs.gov/)
 
 **Sentinel-2 (ESA Copernicus)**
 - Resolution: 10m (visible), 20m (red-edge/SWIR)
-- Temporal coverage: 2015-present
-- Revisit time: 5 days
-- Access: [Copernicus Open Access Hub](https://scihub.copernicus.eu/) or [GEE Catalog](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED)
-- Dataset ID: `COPERNICUS/S2_SR_HARMONIZED`
+- Temporal coverage: 2015-present, 5-day revisit
+- Access: [Copernicus Hub](https://scihub.copernicus.eu/) | [GEE Catalog](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED)
 
 **MODIS Terra/Aqua**
-- Resolution: 250m (bands 1-2), 500m (bands 3-7)
+- Resolution: 250m-500m
 - Temporal coverage: 2000-present
 - Access: [NASA LAADS DAAC](https://ladsweb.modaps.eosdis.nasa.gov/)
 
 ### Glacier Reference Data
 
 **Randolph Glacier Inventory (RGI) v7.0**
-- Global glacier outlines with area and location metadata
+- Global glacier outlines with metadata
 - Download: [NSIDC RGI Dataset](https://nsidc.org/data/nsidc-0770/versions/7)
-- Format: Shapefiles (ESRI) organized by region
 
 **GLIMS Glacier Database**
-- Multi-temporal glacier outlines with analysis metadata
-- Access: [GLIMS Web Interface](https://www.glims.org/maps/glims)
-- API: Available for programmatic access
-
-**Global Land Ice Measurements from Space (GLIMS)**
-- Provides validation data and historical glacier extents
-- Database: [GLIMS Database Search](https://www.glims.org/maps/search)
+- Multi-temporal glacier outlines
+- Access: [GLIMS Database](https://www.glims.org/maps/glims)
 
 ### Digital Elevation Models
 
 **SRTM v3 (30m)**
 - Coverage: 60°N to 56°S
-- Access: [EarthExplorer](https://earthexplorer.usgs.gov/) or GEE: `USGS/SRTMGL1_003`
+- Access: [EarthExplorer](https://earthexplorer.usgs.gov/)
 
 **ASTER GDEM v3 (30m)**
 - Coverage: 83°N to 83°S
-- Access: [NASA Earthdata](https://search.earthdata.nasa.gov/) or GEE: `NASA/ASTER_GED/AG100_003`
+- Access: [NASA Earthdata](https://search.earthdata.nasa.gov/)
 
 **Copernicus DEM (30m/90m)**
-- Global coverage with improved accuracy
+- Global coverage
 - Access: [Copernicus Data Space](https://dataspace.copernicus.eu/)
 
 ## Quick Start
@@ -283,6 +267,7 @@ Glacier-Probe-Model/
 ├── reports/                        # Generated analysis reports
 ├── requirements.txt
 ├── .gitignore
+└── LICENSE.md
 └── README.md
 ```
 
@@ -290,92 +275,65 @@ Glacier-Probe-Model/
 
 ### Phase 1: Machine Learning Baseline
 
-**Step 1: Preprocessing**
-- Apply atmospheric correction using LEDAPS (Landsat) or Sen2Cor (Sentinel-2)
-- Cloud and cloud shadow masking using CFMask algorithm
-- Co-registration using AROSICS library for sub-pixel accuracy
-- Radiometric normalization across temporal series
+**Preprocessing & Computer Vision Pipeline:**
+- Atmospheric correction and radiometric normalization
+- Cloud masking using QA band analysis
+- Image co-registration for temporal alignment
+- Edge detection using Canny and Sobel operators for boundary refinement
 
-**Step 2: Feature Engineering**
-- Spectral indices:
-  - NDSI = (Green - SWIR) / (Green + SWIR)
-  - NDWI = (Green - NIR) / (Green + NIR)
-  - NDVI = (NIR - Red) / (NIR + Red)
-- Texture features using GLCM (contrast, homogeneity, energy, correlation)
-- Terrain derivatives from DEM (slope, aspect, curvature)
-- Band ratios (NIR/Red, SWIR1/SWIR2)
+**Feature Extraction:**
+- Spectral indices: NDSI, NDWI, NDVI
+- Texture features: GLCM (contrast, homogeneity, energy)
+- Morphological operations for noise reduction
+- Terrain derivatives from DEM
 
-**Step 3: Random Forest Classification**
-- Training data: RGI glacier outlines + manually verified samples
-- Class balancing using SMOTE or class weights
-- Hyperparameter tuning via 5-fold cross-validation
-- Feature importance analysis
-- Post-processing: Morphological opening/closing, minimum area threshold (0.01 km²)
+**Classification:**
+- Random Forest with spectral and texture features
+- Post-processing: morphological opening/closing, contour analysis
+- Minimum area filtering for false positive reduction
 
-**Expected Performance:**
-- IoU: 0.82-0.88 on clean ice
-- F1 Score: 0.85-0.91
-- Challenges: Debris-covered glaciers, seasonal snow confusion
+**Expected Performance:** IoU 0.82-0.88, F1 Score 0.85-0.91
 
 ### Phase 2: Deep Learning Enhancement
 
-**Step 1: Training Data Preparation**
-- Generate 256×256 pixel patches from Landsat/Sentinel scenes
+**Training Data & Image Segmentation:**
+- 256×256 pixel patches from satellite scenes
 - Use Phase 1 predictions as pseudo-labels
-- Manual refinement of 10-20% of patches for validation
-- Data augmentation: rotation, flipping, color jittering
+- Data augmentation: rotation, flipping, color transforms
 - Train/val/test split: 70/15/15
 
-**Step 2: U-Net Training**
-- Encoder: ResNet34/ResNet50 (ImageNet pre-trained)
-- Loss function: Combined Binary Cross-Entropy + Dice Loss
-- Optimizer: AdamW with learning rate 1e-4
-- Learning rate scheduling: ReduceLROnPlateau
-- Early stopping based on validation IoU
-- Training epochs: 50-100
+**U-Net Architecture:**
+- Encoder: ResNet34/ResNet50 (pre-trained)
+- Loss: Binary Cross-Entropy + Dice Loss
+- Optimizer: AdamW, learning rate 1e-4
+- Training: 50-100 epochs with early stopping
 
-**Step 3: Temporal Consistency**
-- Apply temporal smoothing using median filtering across 3-5 year windows
-- Flag sudden area changes exceeding 20% as potential errors
-- Cross-reference with meteorological data for validation
+**Computer Vision Enhancement:**
+- Boundary refinement using contour detection
+- Temporal consistency through median filtering
+- Multi-scale feature extraction for debris-covered regions
 
-**Expected Performance:**
-- IoU: 0.89-0.94 on clean ice
-- IoU: 0.72-0.82 on debris-covered glaciers
-- Boundary accuracy: ±15m (0.5 pixel for Landsat)
+**Expected Performance:** IoU 0.89-0.94 (clean ice), 0.72-0.82 (debris-covered)
 
 ## Performance Metrics
 
-**Spatial Accuracy:**
 - Intersection over Union (IoU)
 - F1 Score (Dice Coefficient)
 - Pixel Accuracy
 - Boundary F1 (within 30m buffer)
-
-**Temporal Consistency:**
-- Mean Absolute Error of year-to-year area change
-- Temporal smoothness coefficient
-
-**Validation:**
-- Ground truth comparison using high-resolution imagery (Sentinel-2, Planet)
-- Cross-validation with published glacier inventory updates
+- Temporal Consistency Score
 
 ## Contributing
 
-Contributions are welcome. Please follow these guidelines:
+Contributions are welcome. Please:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improved-cloud-masking`)
+2. Create a feature branch (`git checkout -b feature/improved-segmentation`)
 3. Commit changes with clear messages
 4. Ensure tests pass (`pytest tests/`)
-5. Update documentation if adding new features
-6. Submit a pull request with description of changes
+5. Submit a pull request
 
-### Code Standards
-- Follow PEP 8 style guidelines
-- Add docstrings (NumPy style) to all functions
-- Include unit tests for new functionality
-- Keep functions focused and under 50 lines when possible
+Code should follow PEP 8 guidelines with NumPy-style docstrings.
 
 ## Citation
 
@@ -402,14 +360,6 @@ This project is licensed under the MIT License. See LICENSE file for details.
 - NSIDC for hosting the Randolph Glacier Inventory
 - GLIMS community for glacier outline validation data
 
-## Contact
-
-Project Maintainer: Manjushwar
-
-GitHub: [@Manjushwarofficial](https://github.com/Manjushwarofficial)
-
-Project Link: [https://github.com/Manjushwarofficial/Glacier-Probe-Model](https://github.com/Manjushwarofficial/Glacier-Probe-Model)
-
 ## Development Roadmap
 
 - [x] Repository initialization and documentation
@@ -423,13 +373,6 @@ Project Link: [https://github.com/Manjushwarofficial/Glacier-Probe-Model](https:
 - [ ] Multi-region comparative study (Himalaya, Alps, Andes)
 - [ ] Real-time monitoring system with alert capabilities
 
-## Known Issues
 
-- GDAL version conflicts between rasterio and other libraries (pin GDAL==3.6.4)
-- GEE Python API authentication expires after 7 days (requires re-authentication)
-- Large temporal stacks may exceed memory on systems with <16GB RAM
-- Debris-covered glacier detection remains challenging for ML baseline
-
----
 
 **Status:** This project is under active development. Phase 1 implementation is in progress. Documentation and code will be updated regularly.
