@@ -1,10 +1,15 @@
 # Glacier Probe Model
 
-An AI-powered system for analyzing and mapping long-term glacier retreat patterns using satellite imagery. This project employs a hybrid approach combining traditional machine learning with deep learning techniques to detect, segment, and track glacier boundaries over time.
+An engine for analyzing and mapping long-term glacier retreat patterns using satellite imagery. This project employs a hybrid approach combining traditional machine learning with deep learning techniques to detect, segment, and track glacier boundaries over time.
 
 ![Project Status](https://img.shields.io/badge/status-in%20dev-green)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
+
+<div>
+    <img src="assets/animation.gif" alt="Glacier Comparison gif" style="width:100%; height:350px;">
+</div>
+
 
 ## Overview
 
