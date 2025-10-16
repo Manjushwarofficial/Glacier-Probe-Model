@@ -7,9 +7,11 @@ An engine for analyzing and mapping long-term glacier retreat patterns using sat
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 <div>
-    <img src="assets/animation.gif" alt="Glacier Comparison gif" style="width:100%; height:350px;">
+    <img src="assets/cliff_example.jpg">
+    <img src="assets/processed_img_example.jpg">
 </div>
 
+(PS : The images is not related to this project.)
 
 ## Overview
 
