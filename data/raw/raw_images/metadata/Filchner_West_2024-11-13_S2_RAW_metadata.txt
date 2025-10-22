@@ -1,0 +1,9 @@
+Region: Filchner_West
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2024-11-13
+Cloud Cover: 72.582716%
+Product ID: S2B_MSIL2A_20241113T100049_N0511_R093_T23CNP_20241113T120938
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

@@ -1,0 +1,9 @@
+Region: George_VI_South
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2023-11-22
+Cloud Cover: 65.529698%
+Product ID: S2B_MSIL2A_20231122T132919_N0509_R138_T18DXF_20231122T170225
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

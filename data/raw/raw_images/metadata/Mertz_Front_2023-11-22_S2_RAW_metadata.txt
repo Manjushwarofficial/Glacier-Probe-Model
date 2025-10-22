@@ -1,0 +1,9 @@
+Region: Mertz_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2023-11-22
+Cloud Cover: 46.838579%
+Product ID: S2B_MSIL2A_20231122T233509_N0509_R001_T54DXL_20231123T003555
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

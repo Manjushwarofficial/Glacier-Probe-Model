@@ -1,0 +1,9 @@
+Region: Dotson_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2019-11-11
+Cloud Cover: 2.920019%
+Product ID: S2B_MSIL2A_20191111T161339_N0213_R111_T12CVC_20191111T195210
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

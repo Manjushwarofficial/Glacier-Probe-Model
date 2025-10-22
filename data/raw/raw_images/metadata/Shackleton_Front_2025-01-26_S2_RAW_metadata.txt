@@ -1,0 +1,9 @@
+Region: Shackleton_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2025-01-26
+Cloud Cover: 34.297934%
+Product ID: S2B_MSIL2A_20250126T025609_N0511_R003_T46DFN_20250126T055207
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

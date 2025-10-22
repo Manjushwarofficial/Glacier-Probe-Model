@@ -1,0 +1,9 @@
+Region: Ronne_North
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2021-11-02
+Cloud Cover: 37.698746%
+Product ID: S2B_MSIL2A_20211102T115259_N0301_R137_T20CNT_20211102T140126
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

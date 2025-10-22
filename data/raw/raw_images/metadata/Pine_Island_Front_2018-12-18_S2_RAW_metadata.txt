@@ -1,0 +1,9 @@
+Region: Pine_Island_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2018-12-18
+Cloud Cover: 22.716269%
+Product ID: S2B_MSIL2A_20181218T151259_N0211_R139_T13CES_20181218T182944
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

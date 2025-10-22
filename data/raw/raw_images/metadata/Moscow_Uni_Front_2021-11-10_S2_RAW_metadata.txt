@@ -1,0 +1,9 @@
+Region: Moscow_Uni_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2021-11-10
+Cloud Cover: 8.134232%
+Product ID: S2B_MSIL2A_20211110T024559_N0301_R103_T46DEM_20211110T063717
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

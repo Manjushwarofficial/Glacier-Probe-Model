@@ -1,0 +1,9 @@
+Region: McMurdo_Sound
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2020-11-02
+Cloud Cover: 72.100117%
+Product ID: S2B_MSIL2A_20201102T210529_N0214_R071_T58CDU_20201102T221416
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

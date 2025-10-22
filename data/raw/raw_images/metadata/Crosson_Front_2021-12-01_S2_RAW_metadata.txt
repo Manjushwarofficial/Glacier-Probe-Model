@@ -1,0 +1,9 @@
+Region: Crosson_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2021-12-01
+Cloud Cover: 4.67256%
+Product ID: S2B_MSIL2A_20211201T154309_N0301_R125_T12CWC_20211201T191313
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

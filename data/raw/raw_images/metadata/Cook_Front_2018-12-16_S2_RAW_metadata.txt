@@ -1,0 +1,9 @@
+Region: Cook_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2018-12-16
+Cloud Cover: 4.12484%
+Product ID: S2B_MSIL2A_20181216T225329_N0211_R115_T55DFD_20181217T001010
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

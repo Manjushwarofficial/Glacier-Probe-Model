@@ -1,0 +1,9 @@
+Region: Wilkins_South
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2024-11-15
+Cloud Cover: 68.207121%
+Product ID: S2B_MSIL2A_20241115T140139_N0511_R124_T18DWG_20241115T172317
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

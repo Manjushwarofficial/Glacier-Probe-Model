@@ -1,0 +1,9 @@
+Region: Ross_North_East
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2020-11-03
+Cloud Cover: 12.045038%
+Product ID: S2B_MSIL2A_20201103T203629_N0214_R085_T59CNP_20201103T215423
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

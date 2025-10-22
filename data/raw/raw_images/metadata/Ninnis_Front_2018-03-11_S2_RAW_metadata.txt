@@ -1,0 +1,9 @@
+Region: Ninnis_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2018-03-11
+Cloud Cover: 65.271163%
+Product ID: S2B_MSIL2A_20180311T225329_N0500_R115_T55DEE_20230728T025908
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

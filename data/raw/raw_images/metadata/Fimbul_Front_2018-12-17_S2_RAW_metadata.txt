@@ -1,0 +1,9 @@
+Region: Fimbul_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2018-12-17
+Cloud Cover: 0.212524%
+Product ID: S2B_MSIL2A_20181217T085949_N0211_R121_T30DWG_20181217T123530
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

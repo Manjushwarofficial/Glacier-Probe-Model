@@ -1,0 +1,9 @@
+Region: Larsen_C_South
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2020-11-24
+Cloud Cover: 65.478803%
+Product ID: S2B_MSIL2A_20201124T131909_N0214_R095_T20DNK_20201124T152143
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

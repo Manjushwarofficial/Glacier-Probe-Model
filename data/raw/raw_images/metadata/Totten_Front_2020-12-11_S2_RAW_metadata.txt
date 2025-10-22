@@ -1,0 +1,9 @@
+Region: Totten_Front
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2020-12-11
+Cloud Cover: 54.898822%
+Product ID: S2B_MSIL2A_20201211T012539_N0214_R045_T50DMM_20201211T025011
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility

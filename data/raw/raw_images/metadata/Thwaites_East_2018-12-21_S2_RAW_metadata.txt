@@ -1,0 +1,9 @@
+Region: Thwaites_East
+Satellite: SENTINEL2
+Image Type: RAW (unprocessed)
+Date: 2018-12-21
+Cloud Cover: 0.01417%
+Product ID: S2B_MSIL2A_20181221T152259_N0211_R039_T13CDS_20181221T202759
+Bands: B4 (Red), B3 (Green), B2 (Blue)
+Values: 0-255 (8-bit, converted from 0-10000)
+Processing: Minimal - divided by 40 for visibility
