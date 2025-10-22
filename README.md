@@ -7,8 +7,8 @@ An engine for analyzing and mapping long-term glacier retreat patterns using sat
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 <div>
-    <img src="assets/cliff_example.jpg">
-    <img src="assets/processed_img_example.jpg">
+    <img src="assets/readme_media/cliff_example.jpg">
+    <img src="assets/readme_media/processed_img_example.jpg">
 </div>
 
 (PS : The images is not related to this project.)
@@ -35,9 +35,8 @@ A computer vision project analyzing glacier disintegration over time to support 
 - Multi-decadal change detection (1984-present)
 - Automated area loss quantification and retreat rate calculation
 - Statistical analysis of seasonal variations
-- Interactive geospatial visualization with temporal sliders
 
-## Technology Stack
+## Dependencies
 
 ### Core Libraries
 - Python 3.8+
@@ -67,94 +66,30 @@ A computer vision project analyzing glacier disintegration over time to support 
 
 ## Installation
 
-### Prerequisites
-Ensure GDAL is installed on your system before proceeding.
-
-**Ubuntu/Debian:**
 ```bash
-sudo apt-get update
-sudo apt-get install gdal-bin libgdal-dev python3-gdal
-```
-
-**macOS:**
-```bash
-brew install gdal
-```
-
-**Windows:**
-Use OSGeo4W or install via conda:
-```bash
-conda install -c conda-forge gdal
-```
-
-### Setup
-
-1. Clone the repository
-```bash
+# Clone repository
 git clone https://github.com/Manjushwarofficial/Glacier-Probe-Model.git
 cd Glacier-Probe-Model
-```
 
-2. Create and activate virtual environment
-```bash
+# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-```
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-3. Install Python dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-4. Authenticate Google Earth Engine
-```bash
+# Install GDAL (if not already installed)
+# Ubuntu/Debian
+sudo apt-get install gdal-bin libgdal-dev
+
+# macOS
+brew install gdal
+
+# Windows: Download from https://www.gisinternals.com/
+
+# Authenticate Google Earth Engine (for data download)
 earthengine authenticate
 ```
-
-Follow the authentication flow in your browser and paste the token when prompted.
-
-## Data Sources and Access
-
-### Satellite Imagery
-
-**Landsat Collection 2 (USGS)**
-- Resolution: 30m (multispectral), 15m (panchromatic)
-- Temporal coverage: 1984-present (Landsat 5/7/8/9)
-- Access: [Google Earth Engine](https://developers.google.com/earth-engine/datasets/catalog/landsat) | [EarthExplorer](https://earthexplorer.usgs.gov/)
-
-**Sentinel-2 (ESA Copernicus)**
-- Resolution: 10m (visible), 20m (red-edge/SWIR)
-- Temporal coverage: 2015-present, 5-day revisit
-- Access: [Copernicus Hub](https://scihub.copernicus.eu/) | [GEE Catalog](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED)
-
-**MODIS Terra/Aqua**
-- Resolution: 250m-500m
-- Temporal coverage: 2000-present
-- Access: [NASA LAADS DAAC](https://ladsweb.modaps.eosdis.nasa.gov/)
-
-### Glacier Reference Data
-
-**Randolph Glacier Inventory (RGI) v7.0**
-- Global glacier outlines with metadata
-- Download: [NSIDC RGI Dataset](https://nsidc.org/data/nsidc-0770/versions/7)
-
-**GLIMS Glacier Database**
-- Multi-temporal glacier outlines
-- Access: [GLIMS Database](https://www.glims.org/maps/glims)
-
-### Digital Elevation Models
-
-**SRTM v3 (30m)**
-- Coverage: 60°N to 56°S
-- Access: [EarthExplorer](https://earthexplorer.usgs.gov/)
-
-**ASTER GDEM v3 (30m)**
-- Coverage: 83°N to 83°S
-- Access: [NASA Earthdata](https://search.earthdata.nasa.gov/)
-
-**Copernicus DEM (30m/90m)**
-- Global coverage
-- Access: [Copernicus Data Space](https://dataspace.copernicus.eu/)
 
 ## Quick Start
 
@@ -163,7 +98,7 @@ Follow the authentication flow in your browser and paste the token when prompted
 ```python
 from glacier_probe import GlacierDetector, ChangeAnalyzer
 
-# Initialize ML-based detector
+# Initialize detector
 detector = GlacierDetector(
     method='random_forest',
     ndsi_threshold=0.4,
@@ -219,14 +154,8 @@ python scripts/generate_report.py --ml-results results/ml_baseline --dl-results 
 
 ```
 Glacier-Probe-Model/
-│
-├── data/
-│   ├── raw/                    # Downloaded satellite imagery (GeoTIFF)
-│   ├── processed/              # Preprocessed and co-registered images
-│   ├── annotations/            # Manual glacier boundary labels (optional)
-│   └── reference/              # RGI shapefiles and DEM data
-│
-├── src/
+├── glacier_probe/
+│   ├── __init__.py
 │   ├── preprocessing/
 │   │   ├── atmospheric_correction.py
 │   │   ├── cloud_masking.py
@@ -246,35 +175,30 @@ Glacier-Probe-Model/
 │   └── visualization/
 │       ├── temporal_plots.py
 │       └── interactive_maps.py
-│
 ├── notebooks/
 │   ├── 01_data_exploration.ipynb
 │   ├── 02_ndsi_baseline.ipynb
 │   ├── 03_ml_training.ipynb
 │   ├── 04_dl_refinement.ipynb
 │   └── 05_temporal_analysis.ipynb
-│
 ├── scripts/
 │   ├── download_data.py            # GEE/Sentinelsat data download
 │   ├── ml_detection.py
 │   ├── dl_segmentation.py
 │   └── generate_report.py
-│
 ├── tests/
 │   ├── test_preprocessing.py
 │   ├── test_features.py
 │   └── test_models.py
-│
 ├── configs/
 │   ├── ml_config.yaml              # ML hyperparameters
 │   └── dl_config.yaml              # DL training config
-│
 ├── models/                         # Saved model checkpoints
 ├── results/                        # Detection outputs
 ├── reports/                        # Generated analysis reports
 ├── requirements.txt
 ├── .gitignore
-└── LICENSE.md
+├── LICENSE.md
 └── README.md
 ```
 
@@ -340,8 +264,6 @@ Contributions are welcome. Please:
 4. Ensure tests pass (`pytest tests/`)
 5. Submit a pull request
 
-Code should follow PEP 8 guidelines with NumPy-style docstrings.
-
 ## Citation
 
 If this project contributes to your research, please cite:
@@ -361,7 +283,6 @@ This project is licensed under the MIT License. See LICENSE file for details.
 
 ## Acknowledgments
 
-- Google Earth Engine for providing free access to Landsat and Sentinel archives
 - ESA Copernicus Programme for Sentinel-2 data
 - USGS for Landsat Collection 2 data
 - NSIDC for hosting the Randolph Glacier Inventory
@@ -379,7 +300,5 @@ This project is licensed under the MIT License. See LICENSE file for details.
 - [ ] REST API for on-demand glacier analysis
 - [ ] Multi-region comparative study (Himalaya, Alps, Andes)
 - [ ] Real-time monitoring system with alert capabilities
-
-
 
 **Status:** This project is under active development. Phase 1 implementation is in progress. Documentation and code will be updated regularly.
