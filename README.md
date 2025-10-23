@@ -175,6 +175,14 @@ Glacier-Probe-Model/
 │   └── visualization/
 │       ├── temporal_plots.py
 │       └── interactive_maps.py
+│ 
+├── data/
+│   ├── annotatios/
+│   ├── processed/
+│   ├── raw/
+│   ├── reference/
+│   └── README.MD
+│ 
 ├── notebooks/
 │   ├── 01_data_exploration.ipynb
 │   ├── 02_ndsi_baseline.ipynb
