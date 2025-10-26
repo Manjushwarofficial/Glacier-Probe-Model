@@ -1,7 +1,8 @@
 """
-Antarctic Glacier Boundary Image Downloader - RAW IMAGES VERSION
-Downloads RAW satellite imagery WITHOUT any processing/scaling
-You can apply your own preprocessing later for ML training
+Antarctic Glacier Boundary Image Downloader - MULTISPECTRAL DATA VERSION
+Downloads full multispectral satellite imagery (all key bands).
+This data is UNPROCESSED and saved as Int16.
+It is NOT VISIBLE in standard image viewers but is required for ML.
 """
 
 import ee
@@ -20,8 +21,9 @@ except:
 
 
 # Configuration
-OUTPUT_DIR = 'antarctic_glacier_dataset_raw'
-NUM_IMAGES = 1000  # ← CHANGED: Target 1000 images
+# ← MODIFIED: Changed output directory
+OUTPUT_DIR = 'antarctic_glacier_dataset_multispectral'
+NUM_IMAGES = 1000
 SCALE = 30  # Resolution in meters
 
 # Antarctic Glacier Boundary Regions (VERY SMALL - centered on calving fronts)
@@ -96,11 +98,12 @@ ANTARCTIC_REGIONS = {
 def create_output_dirs():
     """Create output directory structure"""
     Path(OUTPUT_DIR).mkdir(exist_ok=True)
-    Path(f"{OUTPUT_DIR}/raw_images").mkdir(exist_ok=True)
+    # ← MODIFIED: Changed subfolder names for clarity
+    Path(f"{OUTPUT_DIR}/multispectral_images").mkdir(exist_ok=True)
     Path(f"{OUTPUT_DIR}/metadata").mkdir(exist_ok=True)
     print(f"✓ Created output directories in {OUTPUT_DIR}/")
 
-def get_satellite_collection(start_date, end_date, roi, max_cloud_cover=80):  # ← CHANGED: Increased to 80%
+def get_satellite_collection(start_date, end_date, roi, max_cloud_cover=80):
     """Get Sentinel-2 or Landsat collection"""
     # Sentinel-2 (better coverage)
     sentinel2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') \
@@ -127,23 +130,29 @@ def get_satellite_collection(start_date, end_date, roi, max_cloud_cover=80):  # 
 
 def download_raw_image(image, region, filename, satellite_type):
     """
-    Download image with MINIMAL processing - just enough to be visible
-    Convert raw values to 8-bit (0-255) range for standard image viewers
+    # ← MODIFIED: This function now downloads RAW, UNPROCESSED multispectral data.
+    # It saves the data as Int16, not 8-bit.
+    # This data is NOT viewable in standard viewers, but is correct for ML.
     """
     try:
         if satellite_type == 'sentinel2':
-            # Sentinel-2 RGB bands
-            raw_image = image.select(['B4', 'B3', 'B2'])
-            # MINIMAL processing: just convert 0-10000 range to 0-255
-            # Divide by 40 to get reasonable brightness (10000/40 = 250)
-            processed = raw_image.divide(40).clamp(0, 255).toByte()
-        else:
-            # Landsat RGB bands
-            raw_image = image.select(['SR_B4', 'SR_B3', 'SR_B2'])
-            # Apply Landsat scale factors then convert to 8-bit
-            # Scale: multiply by 0.0000275, add -0.2, then multiply by 1000
-            processed = raw_image.multiply(0.0000275).add(-0.2).multiply(1000).clamp(0, 255).toByte()
+            # ← MODIFIED: Select all 10m and 20m bands
+            bands_to_select = ['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B11', 'B12']
+            raw_image = image.select(bands_to_select)
+            
+            # ← MODIFIED: REMOVED all processing (.divide, .clamp, .toByte)
+            # We want the original 0-10000 range, which will be saved as Int16
+            processed = raw_image.toInt16() # Keep original values
         
+        else: # 'landsat'
+            # ← MODIFIED: Select all SR bands (B1-B7)
+            bands_to_select = ['SR_B1', 'SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7']
+            raw_image = image.select(bands_to_select)
+            
+            # ← MODIFIED: REMOVED all processing and scaling.
+            # We will download the original scaled Int16 data from Collection 2
+            processed = raw_image.toInt16() # Keep original values
+
         # Get download URL
         url = processed.getDownloadURL({
             'region': region,
@@ -179,23 +188,28 @@ def save_metadata(image, filename, region_name, satellite_type):
         with open(metadata_file, 'w') as f:
             f.write(f"Region: {region_name}\n")
             f.write(f"Satellite: {satellite_type.upper()}\n")
-            f.write(f"Image Type: RAW (unprocessed)\n")
+            # ← MODIFIED: Updated image type
+            f.write(f"Image Type: MULTISPECTRAL (Scientific Data)\n") 
             
             if satellite_type == 'sentinel2':
                 date = ee.Date(image.get('system:time_start')).format('YYYY-MM-dd').getInfo()
                 f.write(f"Date: {date}\n")
                 f.write(f"Cloud Cover: {props.get('CLOUDY_PIXEL_PERCENTAGE', 'N/A')}%\n")
                 f.write(f"Product ID: {props.get('PRODUCT_ID', 'N/A')}\n")
-                f.write(f"Bands: B4 (Red), B3 (Green), B2 (Blue)\n")
-                f.write(f"Values: 0-255 (8-bit, converted from 0-10000)\n")
-                f.write(f"Processing: Minimal - divided by 40 for visibility\n")
+                # ← MODIFIED: Updated band list
+                f.write(f"Bands: ['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B11', 'B12']\n")
+                # ← MODIFIED: Updated values and processing
+                f.write(f"Values: Raw (0-10000 range)\n")
+                f.write(f"Processing: None. Saved as Int16.\n")
             else:
                 f.write(f"Date: {props.get('DATE_ACQUIRED', 'N/A')}\n")
                 f.write(f"Cloud Cover: {props.get('CLOUD_COVER', 'N/A')}%\n")
                 f.write(f"Scene ID: {props.get('LANDSAT_SCENE_ID', 'N/A')}\n")
-                f.write(f"Bands: SR_B4 (Red), SR_B3 (Green), SR_B2 (Blue)\n")
-                f.write(f"Values: 0-255 (8-bit, with Landsat scale factors)\n")
-                f.write(f"Processing: Minimal - scale factors + brightness adjustment\n")
+                # ← MODIFIED: Updated band list
+                f.write(f"Bands: ['SR_B1', 'SR_B2', 'SR_B3', 'SR_B4', 'SR_B5', 'SR_B6', 'SR_B7']\n")
+                # ← MODIFIED: Updated values and processing
+                f.write(f"Values: Raw (Landsat Collection 2 scaled integers)\n")
+                f.write(f"Processing: None. Saved as Int16.\n")
             
     except Exception as e:
         print(f"  ⚠ Metadata warning: {str(e)[:30]}")
@@ -203,15 +217,16 @@ def save_metadata(image, filename, region_name, satellite_type):
 def main():
     """Main download function"""
     print("=" * 70)
-    print("ANTARCTIC GLACIER IMAGE DOWNLOADER - 1000 IMAGES")
-    print("Minimal processing applied (just enough to be visible)")
+    # ← MODIFIED: Updated title
+    print("ANTARCTIC GLACIER IMAGE DOWNLOADER - MULTISPECTRAL DATA")
+    print("Downloads full, unprocessed scientific data (Int16)")
     print("=" * 70)
     
     create_output_dirs()
     
     # Antarctic summer months - EXPANDED date range
     year_ranges = [
-        ('2014-11-01', '2015-03-31'),  # ← ADDED: Extra year
+        ('2014-11-01', '2015-03-31'),
         ('2015-11-01', '2016-03-31'),
         ('2016-11-01', '2017-03-31'),
         ('2017-11-01', '2018-03-31'),
@@ -221,16 +236,17 @@ def main():
         ('2021-11-01', '2022-03-31'),
         ('2022-11-01', '2023-03-31'),
         ('2023-11-01', '2024-03-31'),
-        ('2024-11-01', '2025-03-31'),  # ← ADDED: Extra year
+        ('2024-11-01', '2025-03-31'),
     ]
     
     downloaded_count = 0
     failed_count = 0
     
-    print(f"\nTarget: {NUM_IMAGES} images (with minimal brightness adjustment)")
+    # ← MODIFIED: Updated print statements
+    print(f"\nTarget: {NUM_IMAGES} images (unprocessed multispectral)")
     print(f"Regions: {len(ANTARCTIC_REGIONS)}")
     print(f"Time periods: {len(year_ranges)}")
-    print(f"Format: GeoTIFF 8-bit (0-255 range for visibility)\n")
+    print(f"Format: GeoTIFF Int16 (Raw scientific data)\n")
     
     for region_name, coords in ANTARCTIC_REGIONS.items():
         if downloaded_count >= NUM_IMAGES:
@@ -257,7 +273,6 @@ def main():
                 
                 print(f"  {start_date[:7]}: {count} images ({satellite_type.upper()})")
                 
-                # ← CHANGED: Get up to 5 images per period (was 3)
                 images_to_download = min(5, count)
                 images = collection.limit(images_to_download).toList(images_to_download)
                 
@@ -273,10 +288,10 @@ def main():
                     else:
                         date_acquired = image.get('DATE_ACQUIRED').getInfo()
                     
-                    # Create filename
+                    # ← MODIFIED: Updated filenames
                     sat_prefix = 'S2' if satellite_type == 'sentinel2' else 'L8'
-                    filename = f"{OUTPUT_DIR}/raw_images/{region_name}_{date_acquired}_{sat_prefix}_RAW.tif"
-                    metadata_filename = f"{OUTPUT_DIR}/metadata/{region_name}_{date_acquired}_{sat_prefix}_RAW_metadata.txt"
+                    filename = f"{OUTPUT_DIR}/multispectral_images/{region_name}_{date_acquired}_{sat_prefix}_MULTI.tif"
+                    metadata_filename = f"{OUTPUT_DIR}/metadata/{region_name}_{date_acquired}_{sat_prefix}_MULTI_metadata.txt"
                     
                     # Skip if exists
                     if os.path.exists(filename):
@@ -305,11 +320,12 @@ def main():
     print("=" * 70)
     print(f"✓ Downloaded: {downloaded_count} images")
     print(f"✗ Failed: {failed_count}")
-    print(f"📁 Location: {OUTPUT_DIR}/raw_images/")
+    # ← MODIFIED: Updated paths
+    print(f"📁 Location: {OUTPUT_DIR}/multispectral_images/")
     print(f"📄 Metadata: {OUTPUT_DIR}/metadata/")
-    print("\nImages are now VISIBLE in standard viewers!")
-    print("Minimal processing applied: raw values converted to 0-255 range")
-    print("You can still apply additional preprocessing for ML training.")
+    print("\nWARNING: These images are raw Int16 data.")
+    print("They will appear black or broken in standard image viewers.")
+    print("This is CORRECT. They are ready for ML preprocessing.")
     print("=" * 70)
 
 if __name__ == "__main__":
