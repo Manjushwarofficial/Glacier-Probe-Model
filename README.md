@@ -185,6 +185,7 @@ Glacier-Probe-Model/
 │   ├── 01_data_exploration.ipynb
 │   ├── 02_ndsi_baseline.ipynb
 │   ├── 03_ml_training.ipynb
+│   └── 04_semantic_segmentation.ipynb
 │   ├── 04_dl_refinement.ipynb
 │   └── 05_temporal_analysis.ipynb
 ├── scripts/
