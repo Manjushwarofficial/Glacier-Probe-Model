@@ -1,68 +1,70 @@
 # Glacier Probe Model
 
-An engine for analyzing and mapping long-term glacier retreat patterns using satellite imagery. This project employs a hybrid approach combining traditional machine learning with deep learning techniques to detect, segment, and track glacier boundaries over time.
-
-![Project Status](https://img.shields.io/badge/status-in%20dev-green)
-![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-orange)
+An engine for analyzing and mapping long-term glacier retreat patterns using satellite imagery. This project provides a standalone application for analyzing glacier disintegration using classic computer vision and machine learning techniques.
 
 <div>
-    <img src="assets/readme_media/cliff_example.jpg">
-    <img src="assets/readme_media/processed_img_example.jpg">
+    <img src="assets/readme_media/cliff_example.jpg" >
+    
 </div>
 
-(PS : The images is not related to this project.)
+
 
 ## Overview
 
-A computer vision project analyzing glacier disintegration over time to support climate awareness and action. Glacier Probe Model applies image segmentation, edge detection, and temporal pattern recognition to multi-decadal satellite imagery, tracking glacier boundary changes and quantifying ice loss rates. The system combines traditional computer vision techniques with machine learning for baseline detection, then employs deep learning-based semantic segmentation to handle complex scenarios including debris-covered glaciers and shadowed regions.
+This project is a computer vision tool built with **PyQt6** for analyzing glacier satellite imagery. It allows users to load their own pre-trained machine learning models (`.pkl` files) to perform two primary tasks:
+
+* **Glacier Retreat Classification:** Predicts if a glacier in an image is *Stable* or *Retreating* based on a comprehensive set of 89 extracted image features.
+* **Image Segmentation:** Classifies each pixel in an image as *Ice*, *Water*, or *Other* using image features to generate a detailed segmentation map and statistics.
+
+The application is designed to be user-friendly, allowing researchers to apply their own models to new imagery without complex scripting. It runs analysis in the background using `QThread` to keep the UI responsive.
+
+
 
 ## Key Capabilities
 
-**Phase 1: ML-Based Detection**
-- NDSI (Normalized Difference Snow Index) calculation from multispectral bands
-- Random Forest classifier trained on spectral, texture (GLCM), and terrain features
-- Automated cloud masking using QA bands
-- Temporal image co-registration and atmospheric correction
+* **PyQt6 GUI Application**
+* **Standalone desktop tool** for Windows, macOS, and Linux
+* Tabbed interface for *Retreat Classification* and *Image Segmentation*
+* Allows loading of custom joblib (`.pkl`) models, scalers, and feature lists
+* Asynchronous model execution using `QThread`
+* Interactive visualization panel using **Matplotlib**
 
-**Phase 2: Deep Learning Enhancement**
-- U-Net semantic segmentation for precise boundary delineation
-- Transfer learning using ImageNet pre-trained encoders
-- Temporal consistency enforcement across time series
-- Debris-covered glacier detection using additional NIR/SWIR band combinations
 
-**Analysis Pipeline**
-- Multi-decadal change detection (1984-present)
-- Automated area loss quantification and retreat rate calculation
-- Statistical analysis of seasonal variations
+
+## Glacier Retreat Classification
+
+* Predicts if a glacier is *Stable* or *Retreating*
+* Extracts 89 features (spectral, texture, edge, morphological, statistical, and gradient)
+* Displays prediction results with probabilities and feature values
+* Exports results as **PNG** or **CSV**
+
+
+
+## Pixel-Level Segmentation
+
+* Classifies each pixel as *Ice*, *Water*, or *Other*
+* Uses a 9-feature extraction pipeline per pixel (RGB, local means, brightness, color ratios)
+* Provides visual overlays and class statistics
+* Exports visualization as **PNG** or segmentation map as **.npy**
+
 
 ## Dependencies
 
-### Core Libraries
-- Python 3.8+
-- PyTorch 2.0+ or TensorFlow 2.12+
-- Scikit-learn 1.3+
-- OpenCV 4.8+
-- NumPy 1.24+, Pandas 2.0+
+Requires **Python 3.8+** and the following libraries:
 
-### Geospatial Processing
-- Rasterio 1.3+ (GeoTIFF handling)
-- GDAL 3.6+
-- Google Earth Engine Python API
-- Sentinelsat (Sentinel-2 data access)
-- GeoPandas 0.13+ (vector operations)
-- Earthpy 0.9+
+```bash
+PyQt6
+matplotlib
+numpy
+pandas
+rasterio
+joblib
+scikit-image
+scipy
+Pillow
+```
 
-### Machine Learning
-- Scikit-image 0.21+ (edge detection, texture features)
-- XGBoost 2.0+
-- Segmentation Models PyTorch
-- timm (pre-trained encoders)
 
-### Visualization
-- Matplotlib 3.7+, Plotly 5.17+
-- Folium 0.14+ (interactive maps)
-- Streamlit 1.28+ (web dashboard)
 
 ## Installation
 
@@ -76,79 +78,41 @@ python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
-pip install -r requirements.txt
-
-# Install GDAL (if not already installed)
-# Ubuntu/Debian
-sudo apt-get install gdal-bin libgdal-dev
-
-# macOS
-brew install gdal
-
-# Windows: Download from https://www.gisinternals.com/
-
-# Authenticate Google Earth Engine (for data download)
-earthengine authenticate
+pip install PyQt6 matplotlib numpy pandas rasterio joblib scikit-image scipy Pillow
 ```
+
+
 
 ## Quick Start
 
-### Basic Glacier Detection
+### 1. Prepare Your Models
 
-```python
-from glacier_probe import GlacierDetector, ChangeAnalyzer
+Ensure you have the following pre-trained `.pkl` models:
 
-# Initialize detector
-detector = GlacierDetector(
-    method='random_forest',
-    ndsi_threshold=0.4,
-    cloud_threshold=20
-)
+* `glacier_retreat_model_svm_(rbf).pkl`
+* `glacier_retreat_scaler.pkl`
+* `glacier_retreat_features.pkl`
+* `glacier_segmentation_model.pkl`
+* `glacier_segmentation_scaler.pkl`
 
-# Load Landsat 8 scene
-image = detector.load_image('LC08_L2SP_path_row_date.tif')
-
-# Detect glacier boundaries
-glacier_mask = detector.detect(image)
-
-# Save results
-detector.save_mask(glacier_mask, 'output/glacier_2023.tif')
-```
-
-### Multi-Temporal Change Analysis
-
-```python
-# Analyze retreat between two dates
-analyzer = ChangeAnalyzer()
-
-images = [
-    'data/glacier_1990.tif',
-    'data/glacier_2000.tif',
-    'data/glacier_2010.tif',
-    'data/glacier_2023.tif'
-]
-
-results = analyzer.calculate_temporal_change(images)
-
-print(f"Total area loss: {results['area_loss_km2']:.2f} km²")
-print(f"Average retreat rate: {results['retreat_rate_m_per_year']:.2f} m/year")
-```
-
-### Running the Full Pipeline
+### 2. Run the Application
 
 ```bash
-# Step 1: Download and preprocess satellite data
-python scripts/download_data.py --region himalaya --start-date 1990-01-01 --end-date 2023-12-31
-
-# Step 2: ML-based baseline detection
-python scripts/ml_detection.py --input data/processed --output results/ml_baseline
-
-# Step 3: DL refinement (requires trained model)
-python scripts/dl_segmentation.py --input data/processed --checkpoint models/unet_best.pth --output results/dl_refined
-
-# Step 4: Generate analysis report
-python scripts/generate_report.py --ml-results results/ml_baseline --dl-results results/dl_refined --output reports/
+python main.py
 ```
+
+### 3. Load Models in the GUI
+
+* Click **Get Started** on the welcome screen
+* In *Model Configuration*, use **Browse...** to select model files
+* Click **Load Models**
+
+### 4. Run Analysis
+
+* Go to *Single Image Prediction* or *Image Segmentation* tab
+* Click **Load Image** and choose `.tif`, `.jpg`, or `.png`
+* Click **Predict Retreat Status** or **Run Segmentation**
+
 
 ## Project Structure
 
@@ -209,103 +173,84 @@ Glacier-Probe-Model/
 └── README.md
 ```
 
+
+
 ## Methodology
 
-### Phase 1: Machine Learning Baseline
+### Glacier Retreat Classification (89 Features)
 
-**Preprocessing & Computer Vision Pipeline:**
-- Atmospheric correction and radiometric normalization
-- Cloud masking using QA band analysis
-- Image co-registration for temporal alignment
-- Edge detection using Canny and Sobel operators for boundary refinement
+* **Spectral Features:** Mean/std of bands, color ratios, brightness, saturation
+* **Edge Features:** Sobel & Canny edge stats
+* **Texture Features:** GLCM, LBP, entropy
+* **Morphological Features:** Area, perimeter, eccentricity, solidity
+* **Statistical Features:** Skewness, kurtosis
+* **Gradient Features:** Gradient mean, std, direction
 
-**Feature Extraction:**
-- Spectral indices: NDSI, NDWI, NDVI
-- Texture features: GLCM (contrast, homogeneity, energy)
-- Morphological operations for noise reduction
-- Terrain derivatives from DEM
+### Pixel-Level Segmentation (9 Features)
 
-**Classification:**
-- Random Forest with spectral and texture features
-- Post-processing: morphological opening/closing, contour analysis
-- Minimum area filtering for false positive reduction
+* RGB values
+* Local mean RGB (7x7 window)
+* Brightness
+* Color ratios (B/R, G/R)
 
-**Expected Performance:** IoU 0.82-0.88, F1 Score 0.85-0.91
 
-### Phase 2: Deep Learning Enhancement
-
-**Training Data & Image Segmentation:**
-- 256×256 pixel patches from satellite scenes
-- Use Phase 1 predictions as pseudo-labels
-- Data augmentation: rotation, flipping, color transforms
-- Train/val/test split: 70/15/15
-
-**U-Net Architecture:**
-- Encoder: ResNet34/ResNet50 (pre-trained)
-- Loss: Binary Cross-Entropy + Dice Loss
-- Optimizer: AdamW, learning rate 1e-4
-- Training: 50-100 epochs with early stopping
-
-**Computer Vision Enhancement:**
-- Boundary refinement using contour detection
-- Temporal consistency through median filtering
-- Multi-scale feature extraction for debris-covered regions
-
-**Expected Performance:** IoU 0.89-0.94 (clean ice), 0.72-0.82 (debris-covered)
 
 ## Performance Metrics
 
-- Intersection over Union (IoU)
-- F1 Score (Dice Coefficient)
-- Pixel Accuracy
-- Boundary F1 (within 30m buffer)
-- Temporal Consistency Score
+* **Classification:** Accuracy, Precision, Recall, F1 Score
+* **Segmentation:** Pixel Accuracy, IoU, Dice Coefficient
+
+
 
 ## Contributing
 
-Contributions are welcome. Please:
+Contributions are welcome!
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improved-segmentation`)
-3. Commit changes with clear messages
-4. Ensure tests pass (`pytest tests/`)
-5. Submit a pull request
+2. Create a new branch:
+
+   ```bash
+   git checkout -b feature/new-feature
+   ```
+3. Commit your changes and submit a PR
+
+
 
 ## Citation
 
-If this project contributes to your research, please cite:
-
 ```bibtex
-@software{glacier_probe_model_2025,
+@software{glacier_probe_model_app_2025,
   author = {Manjushwar},
-  title = {Glacier Probe Model: Hybrid ML-DL System for Glacier Retreat Analysis},
+  title = {Glacier Probe Model: Application for Glacier Analysis},
   year = {2025},
   url = {https://github.com/Manjushwarofficial/Glacier-Probe-Model}
 }
 ```
 
+
+
 ## License
 
-This project is licensed under the MIT License. See LICENSE file for details.
+Licensed under the **MIT License**. See `LICENSE.md` for details.
+
+
 
 ## Acknowledgments
 
-- ESA Copernicus Programme for Sentinel-2 data
-- USGS for Landsat Collection 2 data
-- NSIDC for hosting the Randolph Glacier Inventory
-- GLIMS community for glacier outline validation data
+* ESA Copernicus Programme for Sentinel-2 data
+* USGS for Landsat Collection 2 data
+* NSIDC for Randolph Glacier Inventory
+* GLIMS community for glacier outline validation
+
+
 
 ## Development Roadmap
 
-- [x] Repository initialization and documentation
-- [ ] Data download pipeline implementation (GEE + Sentinelsat)
-- [ ] Phase 1: NDSI baseline and Random Forest classifier
-- [ ] Validation framework with RGI cross-comparison
-- [ ] Phase 2: U-Net architecture and training pipeline
-- [ ] Temporal analysis module with statistical testing
-- [ ] Interactive Streamlit dashboard
-- [ ] REST API for on-demand glacier analysis
-- [ ] Multi-region comparative study (Himalaya, Alps, Andes)
-- [ ] Real-time monitoring system with alert capabilities
+* [x] Core Application Framework (PyQt6)
+* [x] Classification Pipeline (89 features)
+* [x] Segmentation Pipeline (9 features)
+* [x] Asynchronous Execution (QThread)
+* [x] Result Visualization (Matplotlib)
+* [x] Export (PNG, CSV, NPY)
 
-**Status:** This project is under active development. Phase 1 implementation is in progress. Documentation and code will be updated regularly.
+**Status:** Core application with classification & segmentation is complete. Batch processing UI is present but not yet implemented.
