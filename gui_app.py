@@ -1,5 +1,4 @@
 """
-
 GLACIER PROBE MODEL - PyQt6 GUI APPLICATION
 =================================================
 Complete GUI for glacier analysis with prediction and segmentation
@@ -24,8 +23,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QPushButton, QLabel, QFileDialog,
                              QTextEdit, QTabWidget, QProgressBar,
                              QGroupBox, QGridLayout, QTableWidget, QTableWidgetItem,
-                             QMessageBox, QSplitter, QStatusBar, QLineEdit)
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+                             QMessageBox, QSplitter, QStatusBar, QLineEdit,
+                             QStackedWidget, QScrollArea)
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
 from PyQt6.QtGui import QFont, QPixmap, QImage, QIcon
 
 # --- Imports for CLASSIFICATION Pipeline ---
@@ -661,36 +661,106 @@ class GlacierAnalysisApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.predictor = None # For classification
-        self.segmentation_predictor = None # For segmentation (NEW)
+        self.segmentation_predictor = None # For segmentation
         
         self.current_image_path = None
         self.current_result = None
         
-        self.current_seg_image_path = None # (NEW)
-        self.current_seg_result = None # (NEW)
+        self.current_seg_image_path = None
+        self.current_seg_result = None
 
         self.initUI()
         self.setup_connections()
         self.apply_styling() # Apply styles after all widgets are created
+        
+        # Start on the welcome screen
+        self.stacked_widget.setCurrentIndex(0)
+        self.status_bar.hide()
+
 
     def initUI(self):
         """Initialize the user interface"""
 
         self.setWindowTitle("Glacier Probe Model")
         self.setGeometry(100, 100, 1400, 900)
-        # self.setWindowIcon(QIcon("path/to/your/icon.png")) # Add an icon for a modern look
+        
+        # --- NEW: Create QStackedWidget ---
+        self.stacked_widget = QStackedWidget()
+        self.setCentralWidget(self.stacked_widget)
 
-        # Create central widget and main layout
-        central_widget = QWidget()
-        central_widget.setObjectName("CentralWidget") # For styling
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
+        # --- NEW: Page 0: Welcome Screen ---
+        welcome_page = self.create_welcome_page()
+        self.stacked_widget.addWidget(welcome_page)
 
-        # ===== NEW: MAIN TITLE =====
-        self.title_label = QLabel("Glacier Probe Model")
-        self.title_label.setObjectName("MainTitle")
-        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        main_layout.addWidget(self.title_label)
+        # --- NEW: Page 1: Main Application ---
+        main_app_widget = self.create_main_app_page()
+        self.stacked_widget.addWidget(main_app_widget)
+
+        # ===== BOTTOM: STATUS BAR =====
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        self.status_bar.showMessage("Ready. Please load model files.")
+        
+    def create_welcome_page(self):
+        """Creates the initial welcome screen based on the reference image"""
+        widget = QWidget()
+        widget.setObjectName("WelcomePage")
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Main Title (Glacier Probe Model)
+        title = QLabel("Glacier Probe Model")
+        title.setObjectName("WelcomeTitle")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Tagline 1 (Welcome message)
+        tagline1 = QLabel("Welcome! Ready to streamline your glacier analysis workflow?")
+        tagline1.setObjectName("WelcomeTagline1")
+        tagline1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Tagline 2 (Detailed description)
+        tagline2 = QLabel("Load imagery, predict retreat status, and segment ice and water bodies with advanced machine learning.")
+        tagline2.setObjectName("WelcomeTagline2")
+        tagline2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        tagline2.setWordWrap(True) # Ensure text wraps if window is small
+        
+        # Buttons layout
+        button_layout = QHBoxLayout()
+        button_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        # Get Started button
+        start_button = QPushButton("Get Started")
+        start_button.setObjectName("WelcomePrimaryButton") # Specific ID for welcome page
+        start_button.setFixedSize(QSize(180, 50))
+        start_button.clicked.connect(self.show_main_app)
+        button_layout.addWidget(start_button)
+        
+        # Read More button
+        read_more_button = QPushButton("Read More")
+        read_more_button.setObjectName("WelcomeSecondaryButton") # Specific ID for welcome page
+        read_more_button.setFixedSize(QSize(180, 50))
+        # No specific action for Read More for now, can be connected later
+        button_layout.addWidget(read_more_button)
+        
+        # Add widgets to layout with appropriate spacing
+        layout.addStretch(2) # Top spacing
+        layout.addWidget(title)
+        layout.addSpacing(40) # Space between title and first tagline
+        layout.addWidget(tagline1)
+        layout.addSpacing(20) # Space between taglines
+        layout.addWidget(tagline2)
+        layout.addSpacing(50) # Space before buttons
+        layout.addLayout(button_layout)
+        layout.addStretch(3) # Bottom spacing
+        
+        widget.setLayout(layout)
+        return widget
+        
+    def create_main_app_page(self):
+        """Creates the main, scrollable application page"""
+        # This widget holds the entire main app layout
+        main_app_container = QWidget()
+        main_layout = QVBoxLayout(main_app_container)
 
         # ===== TOP: MODEL CONFIGURATION =====
         config_group = self.create_config_section()
@@ -703,7 +773,7 @@ class GlacierAnalysisApp(QMainWindow):
         self.tab_single = self.create_single_prediction_tab()
         self.tabs.addTab(self.tab_single, "Single Image Prediction")
         
-        # Tab 2: Image Segmentation (NEW)
+        # Tab 2: Image Segmentation
         self.tab_segment = self.create_segmentation_tab()
         self.tabs.addTab(self.tab_segment, "Image Segmentation")
 
@@ -716,11 +786,14 @@ class GlacierAnalysisApp(QMainWindow):
         self.tabs.addTab(self.tab_results, "Results & Export")
 
         main_layout.addWidget(self.tabs)
-
-        # ===== BOTTOM: STATUS BAR =====
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage("Ready. Please load model files.")
+        
+        # --- NEW: Create ScrollArea ---
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(main_app_container)
+        scroll_area.setObjectName("ScrollArea")
+        
+        return scroll_area
 
     def create_config_section(self):
         """Create model configuration section"""
@@ -728,7 +801,10 @@ class GlacierAnalysisApp(QMainWindow):
         layout = QGridLayout()
 
         # --- Classification Model ---
-        layout.addWidget(QLabel("--- Classification Model ---"), 0, 0, 1, 3)
+        classification_label = QLabel("Classification Model")
+        classification_label.setObjectName("ConfigSectionHeader") # Add object name
+        layout.addWidget(classification_label, 0, 0, 1, 3) # Span 3 columns
+        
         layout.addWidget(QLabel("Model File:"), 1, 0)
         self.model_path_edit = QLineEdit()
         self.model_path_edit.setPlaceholderText("glacier_retreat_model_svm_(rbf).pkl")
@@ -754,7 +830,10 @@ class GlacierAnalysisApp(QMainWindow):
         layout.addWidget(btn_features, 3, 2)
 
         # --- Segmentation Model (NEW) ---
-        layout.addWidget(QLabel("--- Segmentation Model ---"), 4, 0, 1, 3)
+        segmentation_label = QLabel("Segmentation Model")
+        segmentation_label.setObjectName("ConfigSectionHeader") # Add object name
+        layout.addWidget(segmentation_label, 4, 0, 1, 3) # Span 3 columns
+        
         layout.addWidget(QLabel("Seg. Model File:"), 5, 0)
         self.seg_model_path_edit = QLineEdit()
         self.seg_model_path_edit.setPlaceholderText("glacier_segmentation_model.pkl")
@@ -796,10 +875,20 @@ class GlacierAnalysisApp(QMainWindow):
         left_layout = QVBoxLayout()
         left_panel.setContentsMargins(0, 10, 10, 10) 
 
-        self.btn_load_image = QPushButton("Load Glacier Image")
-        self.btn_load_image.clicked.connect(self.load_image)
+        # --- NEW: Button Layout ---
+        load_button_layout = QHBoxLayout()
+        self.btn_load_image = QPushButton("Load Image")
+        self.btn_load_image.clicked.connect(self.load_classification_image)
         self.btn_load_image.setEnabled(False)
-        left_layout.addWidget(self.btn_load_image)
+        load_button_layout.addWidget(self.btn_load_image)
+
+        self.btn_load_for_both = QPushButton("Load Image for Both")
+        self.btn_load_for_both.clicked.connect(self.load_image_for_both)
+        self.btn_load_for_both.setEnabled(False) # Will be enabled when *both* models are loaded
+        load_button_layout.addWidget(self.btn_load_for_both)
+        
+        left_layout.addLayout(load_button_layout)
+        # --- END NEW ---
 
         self.image_info_label = QLabel("No image loaded")
         self.image_info_label.setWordWrap(True)
@@ -820,7 +909,7 @@ class GlacierAnalysisApp(QMainWindow):
         results_layout = QVBoxLayout()
         self.results_text = QTextEdit()
         self.results_text.setReadOnly(True)
-        self.results_text.setMaximumHeight(200)
+        # self.results_text.setMaximumHeight(200) # --- REMOVED for more space ---
         results_layout.addWidget(self.results_text)
         results_group.setLayout(results_layout)
         left_layout.addWidget(results_group)
@@ -855,15 +944,14 @@ class GlacierAnalysisApp(QMainWindow):
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(left_panel)
         splitter.addWidget(right_panel)
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
+        splitter.setStretchFactor(0, 2) # --- INCREASED left panel default size
+        splitter.setStretchFactor(1, 3)
         splitter.setStyleSheet("QSplitter::handle { background-color: #DDE2E8; }")
 
         layout.addWidget(splitter)
         widget.setLayout(layout)
         return widget
 
-    # --- NEWLY ADDED ---
     def create_segmentation_tab(self):
         """Create image segmentation tab"""
         widget = QWidget()
@@ -932,14 +1020,13 @@ class GlacierAnalysisApp(QMainWindow):
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.addWidget(left_panel)
         splitter.addWidget(right_panel)
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
+        splitter.setStretchFactor(0, 2) # --- INCREASED left panel default size
+        splitter.setStretchFactor(1, 3)
         splitter.setStyleSheet("QSplitter::handle { background-color: #DDE2E8; }")
 
         layout.addWidget(splitter)
         widget.setLayout(layout)
         return widget
-    # --- END NEW ---
 
     def create_batch_processing_tab(self):
         """Create batch processing tab"""
@@ -1045,8 +1132,63 @@ class GlacierAnalysisApp(QMainWindow):
         COLOR_ACCENT_RED = "#D9534F"    # For error/retreating
         
         self.setStyleSheet(f"""
-            QMainWindow, QWidget#CentralWidget {{
+            QMainWindow, QWidget {{
                 background-color: {COLOR_BACKGROUND};
+            }}
+            
+            /* --- Welcome Page --- */
+            QWidget#WelcomePage {{
+                background-color: {COLOR_INPUT_BG}; /* White background */
+            }}
+            QLabel#WelcomeTitle {{
+                font-size: 48px;
+                font-weight: bold;
+                color: {COLOR_TITLE_ACCENT}; /* Light blue title */
+            }}
+            QLabel#WelcomeTagline1 {{
+                font-size: 24px;
+                color: {COLOR_TEXT}; /* Dark text */
+                margin-bottom: 5px; /* Less space to next tagline */
+            }}
+            QLabel#WelcomeTagline2 {{
+                font-size: 16px;
+                color: #555555; /* Slightly lighter grey for description */
+                margin-left: 50px; /* Indent for better readability */
+                margin-right: 50px;
+                line-height: 1.5; /* Improve line spacing */
+            }}
+            
+            /* Welcome Page Primary Button (Get Started) */
+            QPushButton#WelcomePrimaryButton {{
+                background-color: {COLOR_BUTTON}; /* Dark Teal */
+                color: {COLOR_BUTTON_TEXT}; /* White text */
+                font-size: 16px;
+                font-weight: bold;
+                border: none; /* No border for solid button */
+                border-radius: 8px; /* More rounded corners */
+                padding: 12px 25px;
+            }}
+            QPushButton#WelcomePrimaryButton:hover {{
+                background-color: {COLOR_BUTTON_HOVER};
+            }}
+
+            /* Welcome Page Secondary Button (Read More) */
+            QPushButton#WelcomeSecondaryButton {{
+                background-color: transparent;
+                color: {COLOR_TEXT}; /* Dark text */
+                font-size: 16px;
+                font-weight: bold;
+                border: 2px solid {COLOR_BORDER}; /* Light border */
+                border-radius: 8px; /* More rounded corners */
+                padding: 12px 25px;
+            }}
+            QPushButton#WelcomeSecondaryButton:hover {{
+                background-color: #F0F0F0;
+            }}
+            
+            /* --- Scroll Area --- */
+            QScrollArea#ScrollArea {{
+                border: none;
             }}
             
             /* --- Main Title --- */
@@ -1072,6 +1214,15 @@ class GlacierAnalysisApp(QMainWindow):
                 padding: 0 5px;
                 color: {COLOR_BUTTON}; /* CHANGED */
             }}
+            
+            /* --- Model Configuration Section Headers --- */
+            QLabel#ConfigSectionHeader {{
+                font-size: 16px;
+                font-weight: bold;
+                color: {COLOR_BUTTON}; /* Dark Teal for sub-headings */
+                padding-top: 10px;
+                padding-bottom: 5px;
+            }}
 
             QLabel {{
                 color: {COLOR_TEXT};
@@ -1094,7 +1245,7 @@ class GlacierAnalysisApp(QMainWindow):
                 color: {COLOR_ACCENT_RED};
             }}
             
-            /* --- Default Button --- */
+            /* --- Default Button (for buttons NOT on welcome page) --- */
             QPushButton {{
                 background-color: {COLOR_INPUT_BG};
                 color: {COLOR_TEXT};
@@ -1113,7 +1264,7 @@ class GlacierAnalysisApp(QMainWindow):
                 border-color: {COLOR_DISABLED_BG};
             }}
             
-            /* --- Primary Buttons (from objectName) --- */
+            /* --- Primary Buttons (from objectName, for buttons NOT on welcome page) --- */
             QPushButton#PrimaryButton {{
                 background-color: {COLOR_BUTTON};
                 color: {COLOR_BUTTON_TEXT};
@@ -1148,25 +1299,24 @@ class GlacierAnalysisApp(QMainWindow):
                 border-top: 1px solid {COLOR_BORDER};
             }}
             QTabBar::tab {{
-                background: {COLOR_BACKGROUND};
-                color: #555;
-                border: 1px solid {COLOR_BORDER};
-                border-bottom: none;
+                background: {COLOR_BUTTON}; /* Dark Teal for unselected tabs */
+                color: {COLOR_BUTTON_TEXT}; /* White text for unselected tabs */
+                border: none; /* No border for unselected */
                 padding: 10px 20px;
                 border-top-left-radius: 5px;
                 border-top-right-radius: 5px;
                 font-size: 14px;
             }}
             QTabBar::tab:hover {{
-                background: #f0f0f0;
+                background: {COLOR_BUTTON_HOVER};
             }}
             QTabBar::tab:selected {{
-                background: {COLOR_BACKGROUND};
-                color: {COLOR_TITLE_ACCENT}; 
+                background: {COLOR_BACKGROUND}; /* White background for selected tab */
+                color: {COLOR_TITLE_ACCENT}; /* Light Blue for selected tab text */
                 font-weight: bold;
-                border-color: {COLOR_BORDER};
-                border-bottom: 1px solid {COLOR_BACKGROUND}; /* Hides border */
-                margin-bottom: -1px; /* Pulls tab pane up */
+                border: 1px solid {COLOR_BORDER}; /* Border around selected tab */
+                border-bottom-color: {COLOR_BACKGROUND}; /* Hide bottom border to merge with pane */
+                margin-bottom: -1px; /* Overlap with pane border */
             }}
             
             /* --- Other Widgets --- */
@@ -1183,6 +1333,29 @@ class GlacierAnalysisApp(QMainWindow):
                 background-color: {COLOR_TITLE_ACCENT};
                 border-radius: 5px;
             }}
+            
+            /* --- QMessageBox Styling (for popup text) --- */
+            QMessageBox {{
+                background-color: #2F343A; /* Dark background */
+                color: {COLOR_BUTTON_TEXT}; /* White text */
+                font-size: 16px;
+            }}
+            QMessageBox QLabel {{ /* Target labels inside QMessageBox */
+                color: {COLOR_BUTTON_TEXT}; /* White text */
+                font-size: 16px;
+            }}
+            QMessageBox QPushButton {{ /* Target buttons inside QMessageBox */
+                background-color: {COLOR_INPUT_BG}; /* White background for button */
+                color: {COLOR_TEXT}; /* Dark text for button */
+                border: 1px solid {COLOR_BORDER};
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            QMessageBox QPushButton:hover {{
+                background-color: #F0F0F0;
+            }}
         """)
 
     def setup_connections(self):
@@ -1192,6 +1365,11 @@ class GlacierAnalysisApp(QMainWindow):
     # ========================================================================
     # SLOT METHODS
     # ========================================================================
+    
+    def show_main_app(self):
+        """Switches from the welcome screen to the main app"""
+        self.stacked_widget.setCurrentIndex(1)
+        self.status_bar.show()
 
     def browse_file(self, line_edit, file_filter):
         """Browse for a file"""
@@ -1210,7 +1388,6 @@ class GlacierAnalysisApp(QMainWindow):
         seg_model_path = self.seg_model_path_edit.text()
         seg_scaler_path = self.seg_scaler_path_edit.text()
 
-        # Check for at least one set of files
         class_files_present = all([model_path, scaler_path, features_path])
         seg_files_present = all([seg_model_path, seg_scaler_path])
         
@@ -1219,6 +1396,8 @@ class GlacierAnalysisApp(QMainWindow):
             return
 
         status_messages = []
+        class_model_loaded = False
+        seg_model_loaded = False
         
         # Try loading classification model
         if class_files_present:
@@ -1228,6 +1407,7 @@ class GlacierAnalysisApp(QMainWindow):
                     self.btn_load_image.setEnabled(True)
                     self.btn_select_folder.setEnabled(True)
                     status_messages.append("✓ Classification Model Loaded")
+                    class_model_loaded = True
                 except Exception as e:
                     self.btn_load_image.setEnabled(False)
                     self.btn_select_folder.setEnabled(False)
@@ -1244,6 +1424,7 @@ class GlacierAnalysisApp(QMainWindow):
                     self.segmentation_predictor = GlacierSegmentationPredictor(seg_model_path, seg_scaler_path)
                     self.btn_load_seg_image.setEnabled(True) # Enable button on new tab
                     status_messages.append("✓ Segmentation Model Loaded")
+                    seg_model_loaded = True
                 except Exception as e:
                     self.btn_load_seg_image.setEnabled(False)
                     status_messages.append(f"✗ Segmentation Model Failed: {e}")
@@ -1251,6 +1432,12 @@ class GlacierAnalysisApp(QMainWindow):
                 status_messages.append("✗ Segmentation Files: Not Found")
         else:
             status_messages.append("Segmentation Model: Skipped")
+
+        # --- NEW: Enable "Load for Both" button ---
+        if class_model_loaded and seg_model_loaded:
+            self.btn_load_for_both.setEnabled(True)
+        else:
+            self.btn_load_for_both.setEnabled(False)
 
         # Update status label
         final_status = "\n".join(status_messages)
@@ -1268,25 +1455,100 @@ class GlacierAnalysisApp(QMainWindow):
         # Re-apply styling to update the property
         self.model_status_label.style().unpolish(self.model_status_label)
         self.model_status_label.style().polish(self.model_status_label)
+        
+        if class_model_loaded or seg_model_loaded:
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Model Load Status")
+            msg_box.setText("Model loaded successfully!")
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setStyleSheet("""
+                QMessageBox {
+                    background-color: #2F343A; /* Dark background */
+                    color: white; /* White text */
+                    font-size: 16px;
+                }
+                QMessageBox QLabel { /* Target labels inside QMessageBox */
+                    color: white; /* White text */
+                    font-size: 16px;
+                }
+                QMessageBox QPushButton { /* Target buttons inside QMessageBox */
+                    background-color: white; /* White background for button */
+                    color: #040F16; /* Dark text for button */
+                    border: 1px solid #DDE2E8;
+                    border-radius: 5px;
+                    padding: 8px 20px;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                QMessageBox QPushButton:hover {
+                    background-color: #F0F0F0;
+                }
+            """)
+            msg_box.exec()
+            
 
-
-    def load_image(self):
-        """Load a glacier image for CLASSIFICATION"""
+    # --- NEW: Refactored Image Loading ---
+    
+    def open_image_dialog(self):
+        """Opens a file dialog and returns the selected path."""
         file_path, _ = QFileDialog.getOpenFileName(
             self, "Select Glacier Image", "",
             "Image Files (*.tif *.tiff *.jpg *.jpeg *.png)"
         )
+        return file_path
 
+    def load_image_into_classification_tab(self, file_path):
+        """Loads the given file path into the classification tab."""
+        self.current_image_path = file_path
+        self.image_info_label.setText(f"Loaded: {os.path.basename(file_path)}")
+        self.btn_predict.setEnabled(True)
+        self.status_bar.showMessage(f"Image loaded: {os.path.basename(file_path)}", 3000)
+        # Display image
+        self.display_image(file_path, self.canvas_single.axes)
+        self.canvas_single.draw()
+
+    def load_image_into_segmentation_tab(self, file_path):
+        """Loads the given file path into the segmentation tab."""
+        self.current_seg_image_path = file_path
+        self.seg_image_info_label.setText(f"Loaded: {os.path.basename(file_path)}")
+        self.btn_run_segmentation.setEnabled(True)
+        self.status_bar.showMessage(f"Image loaded: {os.path.basename(file_path)}", 3000)
+        # Display image in the *first* panel of the segmentation canvas
+        fig = self.canvas_segmentation.fig
+        fig.clear()
+        ax1 = fig.add_subplot(1, 3, 1)
+        self.display_image(file_path, ax1)
+        # Add placeholder plots
+        ax2 = fig.add_subplot(1, 3, 2)
+        ax2.set_title("Segmentation (Pending)")
+        ax2.axis('off')
+        ax3 = fig.add_subplot(1, 3, 3)
+        ax3.set_title("Overlay (Pending)")
+        ax3.axis('off')
+        fig.tight_layout()
+        self.canvas_segmentation.draw()
+        
+    def load_classification_image(self):
+        """Slot for the 'Load Image' button."""
+        file_path = self.open_image_dialog()
         if file_path:
-            self.current_image_path = file_path
-            self.image_info_label.setText(f"Loaded: {os.path.basename(file_path)}")
-            self.btn_predict.setEnabled(True)
-            self.status_bar.showMessage(f"Image loaded: {os.path.basename(file_path)}", 3000)
+            self.load_image_into_classification_tab(file_path)
 
-            # Display image
-            self.display_image(file_path, self.canvas_single.axes)
-            self.canvas_single.draw()
+    def load_segmentation_image(self):
+        """Slot for the 'Load Image for Segmentation' button."""
+        file_path = self.open_image_dialog()
+        if file_path:
+            self.load_image_into_segmentation_tab(file_path)
 
+    def load_image_for_both(self):
+        """Slot for the 'Load Image for Both' button."""
+        file_path = self.open_image_dialog()
+        if file_path:
+            self.load_image_into_classification_tab(file_path)
+            self.load_image_into_segmentation_tab(file_path)
+            self.tabs.setCurrentIndex(0) # Switch to first tab as default
+
+    # --- END NEW ---
 
     def display_image(self, image_path, axes):
         """Display the loaded image on a given axes"""
@@ -1378,15 +1640,68 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         self.status_bar.showMessage(f"Prediction complete: {prediction}", 5000)
 
         # Show popup
-        QMessageBox.information(self, "Prediction Complete",
-                               f"Glacier Status: {prediction}\nConfidence: {confidence:.1%}")
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Prediction Complete")
+        msg_box.setText(f"Glacier Status: {prediction}\nConfidence: {confidence:.1%}")
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2F343A; /* Dark background */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QLabel { /* Target labels inside QMessageBox */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
+                background-color: white; /* White background for button */
+                color: #040F16; /* Dark text for button */
+                border: 1px solid #DDE2E8;
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #F0F0F0;
+            }
+        """)
+        msg_box.exec()
 
     def on_prediction_error(self, error_msg):
         """Handle classification prediction error"""
         self.progress_bar.setVisible(False)
         self.btn_predict.setEnabled(True)
         self.status_bar.showMessage("Prediction failed", 3000)
-        QMessageBox.critical(self, "Prediction Error", f"Error:\n{error_msg}")
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Prediction Error")
+        msg_box.setText(f"Error:\n{error_msg}")
+        msg_box.setIcon(QMessageBox.Icon.Critical)
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2F343A; /* Dark background */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QLabel { /* Target labels inside QMessageBox */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
+                background-color: white; /* White background for button */
+                color: #040F16; /* Dark text for button */
+                border: 1px solid #DDE2E8;
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #F0F0F0;
+            }
+        """)
+        msg_box.exec()
 
     def visualize_prediction(self, result):
         """Visualize classification prediction result"""
@@ -1442,36 +1757,7 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
             except Exception as e:
                 QMessageBox.critical(self, "Export Error", f"Failed to save file:\n{str(e)}")
 
-    # --- NEWLY ADDED SLOTS FOR SEGMENTATION ---
-    def load_segmentation_image(self):
-        """Load a glacier image for SEGMENTATION"""
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Select Image for Segmentation", "",
-            "Image Files (*.tif *.tiff *.jpg *.jpeg *.png)"
-        )
-
-        if file_path:
-            self.current_seg_image_path = file_path
-            self.seg_image_info_label.setText(f"Loaded: {os.path.basename(file_path)}")
-            self.btn_run_segmentation.setEnabled(True)
-            self.status_bar.showMessage(f"Image loaded: {os.path.basename(file_path)}", 3000)
-
-            # Display image in the *first* panel of the segmentation canvas
-            fig = self.canvas_segmentation.fig
-            fig.clear()
-            ax1 = fig.add_subplot(1, 3, 1)
-            self.display_image(file_path, ax1)
-            
-            # Add placeholder plots
-            ax2 = fig.add_subplot(1, 3, 2)
-            ax2.set_title("Segmentation (Pending)")
-            ax2.axis('off')
-            ax3 = fig.add_subplot(1, 3, 3)
-            ax3.set_title("Overlay (Pending)")
-            ax3.axis('off')
-            
-            fig.tight_layout()
-            self.canvas_segmentation.draw()
+    # --- SLOTS FOR SEGMENTATION ---
 
     def run_segmentation(self):
         """Run segmentation on the loaded image"""
@@ -1509,7 +1795,9 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
             <ul style="list-style-type: none; padding-left: 0;">
         """
         
-        for cls_id, count in stats.items():
+        # Ensure classes 1, 2, 3 are always shown, even if count is 0
+        for cls_id in [1, 2, 3]:
+            count = stats.get(cls_id, 0) # Get count, default to 0
             cls_name = self.segmentation_predictor.classes.get(cls_id, 'unknown').capitalize()
             percentage = (count / total_pixels) * 100
             stats_html += f"<li><b>{cls_name}:</b> {count:8,} pixels ({percentage:5.2f}%)</li>"
@@ -1526,14 +1814,68 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         self.btn_export_segmentation.setEnabled(True)
         self.status_bar.showMessage("Segmentation complete", 5000)
 
-        QMessageBox.information(self, "Segmentation Complete", "Segmentation finished successfully.")
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Segmentation Complete")
+        msg_box.setText("Segmentation finished successfully.")
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2F343A; /* Dark background */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QLabel { /* Target labels inside QMessageBox */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
+                background-color: white; /* White background for button */
+                color: #040F16; /* Dark text for button */
+                border: 1px solid #DDE2E8;
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #F0F0F0;
+            }
+        """)
+        msg_box.exec()
 
     def on_segmentation_error(self, error_msg):
         """Handle segmentation error"""
         self.seg_progress_bar.setVisible(False)
         self.btn_run_segmentation.setEnabled(True)
         self.status_bar.showMessage("Segmentation failed", 3000)
-        QMessageBox.critical(self, "Segmentation Error", f"Error:\n{error_msg}")
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Segmentation Error")
+        msg_box.setText(f"Error:\n{error_msg}")
+        msg_box.setIcon(QMessageBox.Icon.Critical)
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2F343A; /* Dark background */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QLabel { /* Target labels inside QMessageBox */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
+                background-color: white; /* White background for button */
+                color: #040F16; /* Dark text for button */
+                border: 1px solid #DDE2E8;
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #F0F0F0;
+            }
+        """)
+        msg_box.exec()
 
     def display_segmentation_result(self, result):
         """
@@ -1632,9 +1974,35 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
 
     def run_batch_prediction(self):
         """Run batch prediction (placeholder)"""
-        QMessageBox.information(self, "Batch Processing",
-                               "Batch processing will process all images in the selected folder.\n\n"
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Batch Processing")
+        msg_box.setText("Batch processing will process all images in the selected folder.\n\n"
                                "This feature is being implemented...")
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2F343A; /* Dark background */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QLabel { /* Target labels inside QMessageBox */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
+                background-color: white; /* White background for button */
+                color: #040F16; /* Dark text for button */
+                border: 1px solid #DDE2E8;
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #F0F0F0;
+            }
+        """)
+        msg_box.exec()
 
     def export_batch_results(self):
         """Export batch results (placeholder)"""
@@ -1642,7 +2010,34 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
 
     def export_results(self, format_type):
         """Export session results"""
-        QMessageBox.information(self, "Export", f"Export to {format_type.upper()} coming soon...")
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Export")
+        msg_box.setText(f"Export to {format_type.upper()} coming soon...")
+        msg_box.setIcon(QMessageBox.Icon.Information)
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #2F343A; /* Dark background */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QLabel { /* Target labels inside QMessageBox */
+                color: white; /* White text */
+                font-size: 16px;
+            }
+            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
+                background-color: white; /* White background for button */
+                color: #040F16; /* Dark text for button */
+                border: 1px solid #DDE2E8;
+                border-radius: 5px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #F0F0F0;
+            }
+        """)
+        msg_box.exec()
 
 # ============================================================================
 # MAIN ENTRY POINT
