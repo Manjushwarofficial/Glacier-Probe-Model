@@ -18,6 +18,17 @@ This project is a computer vision tool built with **PyQt6** for analyzing glacie
 
 The application is designed to be user-friendly, allowing researchers to apply their own models to new imagery without complex scripting. It runs analysis in the background using `QThread` to keep the UI responsive.
 
+## Project Screenshots
+
+### Semantic Segmantation:
+<div>
+    <img src="assets/screenshots/Screenshot 2025-10-28 at 8.16.01 PM.png" >
+</div>
+
+### Classification:
+<div>
+    <img src="assets/screenshots/Screenshot 2025-10-28 at 8.15.20 PM.png" >
+</div>
 
 
 ## Key Capabilities
@@ -73,12 +84,6 @@ Pillow
 git clone https://github.com/Manjushwarofficial/Glacier-Probe-Model.git
 cd Glacier-Probe-Model
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install PyQt6 matplotlib numpy pandas rasterio joblib scikit-image scipy Pillow
 ```
 
 
@@ -145,6 +150,14 @@ Glacier-Probe-Model/
 │   ├── raw/
 │   ├── reference/
 │   └── README.MD
+├── models/
+│   ├── .ipynb_checkpoints/
+│   ├── glacier_classifications.pkl
+│   ├── glacier_retreat_features.pkl
+│   ├── glacier_retreat_model_svm_(rbf).pkl
+│   ├── glacier_retreat_scaler.pkl
+│   ├── glacier_segmentation_model.pkl
+│   └── glacier_segmentation_scaler.pkl
 ├── notebooks/
 │   ├── 01_data_exploration.ipynb
 │   ├── 02_ndsi_baseline.ipynb
@@ -172,6 +185,12 @@ Glacier-Probe-Model/
 ├── LICENSE.md
 └── README.md
 ```
+## Model Training Flowchart
+
+<div>
+    <img src="assets/readme_media/training_workflow.png" >
+    
+</div>
 
 
 
@@ -198,6 +217,15 @@ Glacier-Probe-Model/
 ## Performance Metrics
 
 * **Classification:** Accuracy, Precision, Recall, F1 Score
+
+<div>
+    <img src="assets/plots/glacier_retreat_evaluation.png" >
+</div>
+
+<div>
+    <img src="assets/plots/feature_importance.png" >
+</div>
+
 * **Segmentation:** Pixel Accuracy, IoU, Dice Coefficient
 
 
