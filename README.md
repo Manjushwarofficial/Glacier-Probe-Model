@@ -233,6 +233,18 @@ Glacier-Probe-Model/
 </div>
 
 * **Segmentation:** Pixel Accuracy, IoU, Dice Coefficient
+  
+<div>
+    <img src="assets/plots/classification_report.png" >
+    
+</div>
+
+<div>
+    <img src="assets/plots/feature_importance 2.png" >
+    
+</div>
+
+
 
 
 
