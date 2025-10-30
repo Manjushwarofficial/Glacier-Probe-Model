@@ -7,7 +7,13 @@ An engine for analyzing and mapping long-term glacier retreat patterns using sat
     
 </div>
 
+## Project Video
 
+[Click Here](https://drive.google.com/file/d/194QbmlnWNy0i7rp_p7XojyMDyuUgelTJ/view?usp=share_link)
+
+## Report Link
+
+[Click Here](https://drive.google.com/file/d/1qn_qPBC5mWmJL2ziZ3FzDnA3i-f-e8i3/view?usp=share_link)
 
 ## Overview
 
