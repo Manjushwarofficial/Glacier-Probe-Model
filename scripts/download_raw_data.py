@@ -126,10 +126,6 @@ def get_satellite_collection(start_date, end_date, roi, max_cloud_cover=80):  # 
         return None, None
 
 def download_raw_image(image, region, filename, satellite_type):
-    """
-    Download image with MINIMAL processing - just enough to be visible
-    Convert raw values to 8-bit (0-255) range for standard image viewers
-    """
     try:
         if satellite_type == 'sentinel2':
             # Sentinel-2 RGB bands
@@ -141,7 +137,6 @@ def download_raw_image(image, region, filename, satellite_type):
             # Landsat RGB bands
             raw_image = image.select(['SR_B4', 'SR_B3', 'SR_B2'])
             # Apply Landsat scale factors then convert to 8-bit
-            # Scale: multiply by 0.0000275, add -0.2, then multiply by 1000
             processed = raw_image.multiply(0.0000275).add(-0.2).multiply(1000).clamp(0, 255).toByte()
         
         # Get download URL

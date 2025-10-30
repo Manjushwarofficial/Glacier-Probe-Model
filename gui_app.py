@@ -356,19 +356,19 @@ class GlacierRetreatPredictor:
         """
         print(f"\n[1/5] Loading image...")
         image_data = self.load_image(image_path)
-        print(f"  ✓ Image shape: {image_data.shape}")
+        print(f"   ✓ Image shape: {image_data.shape}")
         
         print("\n[2/5] Preprocessing...")
         image_data = self.preprocess_image(image_data)
-        print(f"  ✓ Preprocessed")
+        print(f"   ✓ Preprocessed")
         
         print("\n[3/5] Extracting features...")
         features = self.extract_features(image_data)
-        print(f"  ✓ Extracted {len(features)} features")
+        print(f"   ✓ Extracted {len(features)} features")
         
         print("\n[4/5] Preparing features for model...")
         X = self.prepare_features_for_model(features)
-        print(f"  ✓ Feature vector shape: {X.shape}")
+        print(f"   ✓ Feature vector shape: {X.shape}")
         
         print("\n[5/5] Scaling and predicting...")
         X_scaled = self.scaler.transform(X)
@@ -380,8 +380,8 @@ class GlacierRetreatPredictor:
         print(f"{'='*70}")
         print(f"Status: {'RETREATING' if prediction == 1 else 'STABLE'}")
         print(f"Confidence:")
-        print(f"  - Stable:     {probability[0]:.1%}")
-        print(f"  - Retreating: {probability[1]:.1%}")
+        print(f"   - Stable:      {probability[0]:.1%}")
+        print(f"   - Retreating: {probability[1]:.1%}")
         print(f"{'='*70}\n")
         
         # This dict matches what the GUI worker expects
@@ -448,9 +448,9 @@ def extract_features_fast(image):
     # Color ratios (water detection)
     with np.errstate(divide='ignore', invalid='ignore'):
         features[:, :, 7] = np.where(img_norm[:, :, 0] > 0,
-                                      img_norm[:, :, 2] / img_norm[:, :, 0], 0)  # B/R
+                                     img_norm[:, :, 2] / img_norm[:, :, 0], 0)  # B/R
         features[:, :, 8] = np.where(img_norm[:, :, 0] > 0,
-                                     img_norm[:, :, 1] / img_norm[:, :, 0], 0)  # G/R
+                                    img_norm[:, :, 1] / img_norm[:, :, 0], 0)  # G/R
     
     return features
 
@@ -489,10 +489,10 @@ class GlacierSegmentationPredictor:
         
         # Color map for visualization
         self.colors = np.array([
-            [0, 0, 0],         # 0: black (unused)
-            [0, 255, 255],     # 1: cyan (ice)
-            [0, 0, 255],       # 2: blue (water)
-            [128, 128, 128]    # 3: gray (other)
+            [0, 0, 0],       # 0: black (unused)
+            [0, 255, 255],   # 1: cyan (ice)
+            [0, 0, 255],     # 2: blue (water)
+            [128, 128, 128]  # 3: gray (other)
         ])
         
         print("="*70 + "\n")
@@ -537,24 +537,24 @@ class GlacierSegmentationPredictor:
         # Step 1: Load image
         print("\n[1/5] Loading image...")
         image = self.load_image(image_path)
-        print(f"  ✓ Image shape: {image.shape}")
+        print(f"   ✓ Image shape: {image.shape}")
         
         # Step 2: Extract features
         print("\n[2/5] Extracting features...")
         features = extract_features_fast(image)
         h, w, n_features = features.shape
-        print(f"  ✓ Feature shape: {features.shape}")
-        print(f"  ✓ Total pixels: {h * w:,}")
+        print(f"   ✓ Feature shape: {features.shape}")
+        print(f"   ✓ Total pixels: {h * w:,}")
         
         # Step 3: Reshape for prediction
         print("\n[3/5] Preparing features...")
         X = features.reshape(-1, n_features)
-        print(f"  ✓ Feature matrix: {X.shape}")
+        print(f"   ✓ Feature matrix: {X.shape}")
         
         # Step 4: Scale features
         print("\n[4/5] Scaling features...")
         X_scaled = self.scaler.transform(X)
-        print(f"  ✓ Features scaled")
+        print(f"   ✓ Features scaled")
         
         # Step 5: Predict
         print("\n[5/5] Predicting segmentation...")
@@ -574,7 +574,7 @@ class GlacierSegmentationPredictor:
         for cls, count in stats_dict.items():
             cls_name = self.classes.get(cls, 'unknown')
             percentage = (count / segmentation.size) * 100
-            print(f"  {cls_name.capitalize():10s}: {count:8,} pixels ({percentage:5.2f}%)")
+            print(f"   {cls_name.capitalize():10s}: {count:8,} pixels ({percentage:5.2f}%)")
         print(f"{'='*70}\n")
         
         return {
@@ -1298,24 +1298,29 @@ class GlacierAnalysisApp(QMainWindow):
             QTabWidget::pane {{
                 border-top: 1px solid {COLOR_BORDER};
             }}
+            
+            /* === CHANGED: Unselected Tab === */
             QTabBar::tab {{
-                background: {COLOR_BUTTON}; /* Dark Teal for unselected tabs */
-                color: {COLOR_BUTTON_TEXT}; /* White text for unselected tabs */
-                border: none; /* No border for unselected */
+                background: #E0E0E0; /* Light gray for unselected tabs */
+                color: {COLOR_TEXT}; /* Dark text for unselected tabs */
+                border: 1px solid {COLOR_BORDER};
+                border-bottom: none; /* No bottom border */
                 padding: 10px 20px;
                 border-top-left-radius: 5px;
                 border-top-right-radius: 5px;
                 font-size: 14px;
             }}
+            /* === CHANGED: Unselected Tab Hover === */
             QTabBar::tab:hover {{
-                background: {COLOR_BUTTON_HOVER};
+                background: #F0F0F0; /* Lighter hover for unselected */
             }}
+            /* === CHANGED: Selected Tab === */
             QTabBar::tab:selected {{
-                background: {COLOR_BACKGROUND}; /* White background for selected tab */
-                color: {COLOR_TITLE_ACCENT}; /* Light Blue for selected tab text */
+                background: {COLOR_BUTTON}; /* Dark Teal for selected tab */
+                color: {COLOR_BUTTON_TEXT}; /* White text for selected tab text */
                 font-weight: bold;
-                border: 1px solid {COLOR_BORDER}; /* Border around selected tab */
-                border-bottom-color: {COLOR_BACKGROUND}; /* Hide bottom border to merge with pane */
+                border: 1px solid {COLOR_BUTTON}; /* Border to match background */
+                border-bottom-color: {COLOR_BUTTON}; 
                 margin-bottom: -1px; /* Overlap with pane border */
             }}
             
@@ -1335,18 +1340,20 @@ class GlacierAnalysisApp(QMainWindow):
             }}
             
             /* --- QMessageBox Styling (for popup text) --- */
+            /* === CHANGED: Popup Background/Text === */
             QMessageBox {{
-                background-color: #2F343A; /* Dark background */
-                color: {COLOR_BUTTON_TEXT}; /* White text */
+                background-color: {COLOR_INPUT_BG}; /* White background */
+                color: {COLOR_TEXT}; /* Dark text */
                 font-size: 16px;
             }}
             QMessageBox QLabel {{ /* Target labels inside QMessageBox */
-                color: {COLOR_BUTTON_TEXT}; /* White text */
+                color: {COLOR_TEXT}; /* Dark text */
                 font-size: 16px;
             }}
+            /* === CHANGED: Popup Button === */
             QMessageBox QPushButton {{ /* Target buttons inside QMessageBox */
-                background-color: {COLOR_INPUT_BG}; /* White background for button */
-                color: {COLOR_TEXT}; /* Dark text for button */
+                background-color: {COLOR_INPUT_BG}; 
+                color: {COLOR_TEXT};
                 border: 1px solid {COLOR_BORDER};
                 border-radius: 5px;
                 padding: 8px 20px;
@@ -1355,6 +1362,7 @@ class GlacierAnalysisApp(QMainWindow):
             }}
             QMessageBox QPushButton:hover {{
                 background-color: #F0F0F0;
+                border: 1px solid #c0c0c0;
             }}
         """)
 
@@ -1461,29 +1469,7 @@ class GlacierAnalysisApp(QMainWindow):
             msg_box.setWindowTitle("Model Load Status")
             msg_box.setText("Model loaded successfully!")
             msg_box.setIcon(QMessageBox.Icon.Information)
-            msg_box.setStyleSheet("""
-                QMessageBox {
-                    background-color: #2F343A; /* Dark background */
-                    color: white; /* White text */
-                    font-size: 16px;
-                }
-                QMessageBox QLabel { /* Target labels inside QMessageBox */
-                    color: white; /* White text */
-                    font-size: 16px;
-                }
-                QMessageBox QPushButton { /* Target buttons inside QMessageBox */
-                    background-color: white; /* White background for button */
-                    color: #040F16; /* Dark text for button */
-                    border: 1px solid #DDE2E8;
-                    border-radius: 5px;
-                    padding: 8px 20px;
-                    font-size: 14px;
-                    font-weight: bold;
-                }
-                QMessageBox QPushButton:hover {
-                    background-color: #F0F0F0;
-                }
-            """)
+            # --- STYLESHEET REMOVED ---
             msg_box.exec()
             
 
@@ -1644,29 +1630,7 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         msg_box.setWindowTitle("Prediction Complete")
         msg_box.setText(f"Glacier Status: {prediction}\nConfidence: {confidence:.1%}")
         msg_box.setIcon(QMessageBox.Icon.Information)
-        msg_box.setStyleSheet("""
-            QMessageBox {
-                background-color: #2F343A; /* Dark background */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QLabel { /* Target labels inside QMessageBox */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
-                background-color: white; /* White background for button */
-                color: #040F16; /* Dark text for button */
-                border: 1px solid #DDE2E8;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QMessageBox QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """)
+        # --- STYLESHEET REMOVED ---
         msg_box.exec()
 
     def on_prediction_error(self, error_msg):
@@ -1678,29 +1642,7 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         msg_box.setWindowTitle("Prediction Error")
         msg_box.setText(f"Error:\n{error_msg}")
         msg_box.setIcon(QMessageBox.Icon.Critical)
-        msg_box.setStyleSheet("""
-            QMessageBox {
-                background-color: #2F343A; /* Dark background */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QLabel { /* Target labels inside QMessageBox */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
-                background-color: white; /* White background for button */
-                color: #040F16; /* Dark text for button */
-                border: 1px solid #DDE2E8;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QMessageBox QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """)
+        # --- STYLESHEET REMOVED ---
         msg_box.exec()
 
     def visualize_prediction(self, result):
@@ -1728,6 +1670,9 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         title = f"Prediction: {prediction.upper()}\nConfidence: {confidence:.1%}"
         self.canvas_single.axes.set_title(title, fontsize=14, fontweight='bold', color=color)
         self.canvas_single.axes.axis('off')
+
+        self.canvas_single.fig.tight_layout()
+        
         self.canvas_single.draw()
 
     def export_single_result(self):
@@ -1818,29 +1763,7 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         msg_box.setWindowTitle("Segmentation Complete")
         msg_box.setText("Segmentation finished successfully.")
         msg_box.setIcon(QMessageBox.Icon.Information)
-        msg_box.setStyleSheet("""
-            QMessageBox {
-                background-color: #2F343A; /* Dark background */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QLabel { /* Target labels inside QMessageBox */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
-                background-color: white; /* White background for button */
-                color: #040F16; /* Dark text for button */
-                border: 1px solid #DDE2E8;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QMessageBox QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """)
+        # --- STYLESHEET REMOVED ---
         msg_box.exec()
 
     def on_segmentation_error(self, error_msg):
@@ -1852,29 +1775,7 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         msg_box.setWindowTitle("Segmentation Error")
         msg_box.setText(f"Error:\n{error_msg}")
         msg_box.setIcon(QMessageBox.Icon.Critical)
-        msg_box.setStyleSheet("""
-            QMessageBox {
-                background-color: #2F343A; /* Dark background */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QLabel { /* Target labels inside QMessageBox */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
-                background-color: white; /* White background for button */
-                color: #040F16; /* Dark text for button */
-                border: 1px solid #DDE2E8;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QMessageBox QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """)
+        # --- STYLESHEET REMOVED ---
         msg_box.exec()
 
     def display_segmentation_result(self, result):
@@ -1977,31 +1878,9 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         msg_box = QMessageBox(self)
         msg_box.setWindowTitle("Batch Processing")
         msg_box.setText("Batch processing will process all images in the selected folder.\n\n"
-                               "This feature is being implemented...")
+                                      "This feature is being implemented...")
         msg_box.setIcon(QMessageBox.Icon.Information)
-        msg_box.setStyleSheet("""
-            QMessageBox {
-                background-color: #2F343A; /* Dark background */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QLabel { /* Target labels inside QMessageBox */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
-                background-color: white; /* White background for button */
-                color: #040F16; /* Dark text for button */
-                border: 1px solid #DDE2E8;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QMessageBox QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """)
+        # --- STYLESHEET REMOVED ---
         msg_box.exec()
 
     def export_batch_results(self):
@@ -2014,29 +1893,7 @@ Gradient Mean: {features.get('gradient_mean', 0):.4f}
         msg_box.setWindowTitle("Export")
         msg_box.setText(f"Export to {format_type.upper()} coming soon...")
         msg_box.setIcon(QMessageBox.Icon.Information)
-        msg_box.setStyleSheet("""
-            QMessageBox {
-                background-color: #2F343A; /* Dark background */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QLabel { /* Target labels inside QMessageBox */
-                color: white; /* White text */
-                font-size: 16px;
-            }
-            QMessageBox QPushButton { /* Target buttons inside QMessageBox */
-                background-color: white; /* White background for button */
-                color: #040F16; /* Dark text for button */
-                border: 1px solid #DDE2E8;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QMessageBox QPushButton:hover {
-                background-color: #F0F0F0;
-            }
-        """)
+        # --- STYLESHEET REMOVED ---
         msg_box.exec()
 
 # ============================================================================
